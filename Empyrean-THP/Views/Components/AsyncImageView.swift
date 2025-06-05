@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// Reusable view that asynchronously loads and displays an image from a URL
 struct AsyncImageView: View {
     
     var imageUrl: String

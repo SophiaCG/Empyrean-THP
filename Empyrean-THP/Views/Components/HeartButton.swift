@@ -8,26 +8,38 @@
 import SwiftUI
 import CoreData
 
+// A button that toggles the "like" state of an item and stores/removes it from Core Data
 struct HeartButton: View {
 
+    // The Core Data context used to read/write PostEntity, UserEntity, and CommentEntity
     @Environment(\.managedObjectContext) private var viewContext
 
+    // Binding to track whether the current item is liked
     @Binding var isLiked: Bool
+
+    // Binding to the item being displayed
     @Binding var item: Item
+
+    // Binding to the associated user (author of the item)
     @Binding var user: User
+
+    // Binding to the comments associated with the item
     @Binding var comments: [Comment]
 
+    // Optional callback when the item is unliked
     var onUnlike: (() -> Void)? = nil
     
     var body: some View {
         Button(action: {
-            let postId = $item.id
+            let postId = $item.id  // Access item ID
 
             if doesPostExist(withId: postId, in: viewContext) {
+                // If item is already liked, remove it from Core Data
                 deletePost(withId: postId, in: viewContext)
                 isLiked = false
                 onUnlike?()
             } else {
+                // Otherwise, create new Core Data entries for the post, user, and comments
                 let newPost = PostEntity(context: viewContext)
                 newPost.id = Int64(postId)
                 newPost.title = item.title
@@ -49,6 +61,7 @@ struct HeartButton: View {
                     newComment.post = newPost
                 }
 
+                // Attempt to save all data to Core Data
                 do {
                     try viewContext.save()
                     isLiked = true
@@ -57,21 +70,24 @@ struct HeartButton: View {
                 }
             }
         }) {
+            // Heart Icon UI
             Image(systemName: isLiked ? "heart.fill" : "heart")
                 .foregroundColor(isLiked ? .red : .primary)
                 .font(.system(size: 30))
                 .fontWeight(.light)
         }
         .onAppear {
+            // Set `isLiked` on load by checking Core Data
             isLiked = doesPostExist(withId: $item.id, in: viewContext)
         }
         .onChange(of: item.id) {
+            // Update `isLiked` if the item changes
             isLiked = doesPostExist(withId: item.id, in: viewContext)
         }
     }
 
     // MARK: - Core Data Helpers
-
+    // Checks whether a post with the given ID exists in Core Data
     func doesPostExist(withId id: Int, in context: NSManagedObjectContext) -> Bool {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PostEntity")
         fetchRequest.predicate = NSPredicate(format: "id == %d", id)
@@ -85,6 +101,7 @@ struct HeartButton: View {
         }
     }
 
+    // Deletes a post with the given ID from Core Data
     func deletePost(withId id: Int, in context: NSManagedObjectContext) {
         let fetchRequest: NSFetchRequest<PostEntity> = PostEntity.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %d", id)
