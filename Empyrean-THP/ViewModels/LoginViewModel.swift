@@ -16,8 +16,16 @@ class LoginViewModel: ObservableObject {
     @Published var isAuthenticated = false
     @Published var wrongUsername = false
     @Published var wrongPassword = false
+    @Published var isLoading = false
 
     func login() {
+        // Reset state
+        isLoading = true
+        errorMessage = ""
+        isAuthenticated = false
+        wrongUsername = false
+        wrongPassword = false
+
         // Temporary hardcoded check
         wrongUsername = username != "test"
         wrongPassword = password != "password123"
@@ -31,6 +39,8 @@ class LoginViewModel: ObservableObject {
         // If hardcoded credentials pass, continue with API login
         APIService.shared.login(username: username, password: password) { [weak self] result in
             DispatchQueue.main.async {
+                self?.isLoading = false
+
                 switch result {
                 case .success(let newToken):
                     self?.token = newToken

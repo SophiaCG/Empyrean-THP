@@ -70,8 +70,21 @@ struct ContentView: View {
                     .cornerRadius(10)
 
                     if !loginVM.errorMessage.isEmpty {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                            .font(.largeTitle)
                         Text("Error: \(loginVM.errorMessage)").foregroundColor(.red)
                     }
+                }
+                if loginVM.isLoading {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    ProgressView("Logging in...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.black.opacity(0.7))
+                        .cornerRadius(10)
                 }
             }
             .navigationBarHidden(true)

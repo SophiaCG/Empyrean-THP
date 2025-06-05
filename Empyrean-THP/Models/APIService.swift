@@ -70,7 +70,13 @@ class APIService {
         }.resume()
     }
     
-    func fetch<T: Decodable>(_ endpoint: APIEndpoint, token: String, completion: @escaping (Result<T, Error>) -> Void) {
+    func fetch<T: Codable>(_ endpoint: APIEndpoint, token: String, completion: @escaping (Result<T, Error>) -> Void) {
+        // Try loading from cache first
+        if let cached: T = loadCache(for: endpoint, as: T.self) {
+            completion(.success(cached))
+        }
+
+        // Proceed with network request
         guard let url = URL(string: "\(API.baseURL)\(endpoint.path)") else {
             return completion(.failure(NSError(domain: "Invalid URL", code: 0)))
         }
@@ -89,10 +95,29 @@ class APIService {
 
             do {
                 let decoded = try JSONDecoder().decode(T.self, from: data)
+                self.cache(decoded, for: endpoint) // Cache the successful response
                 completion(.success(decoded))
             } catch {
                 completion(.failure(error))
             }
         }.resume()
+    }
+
+    private func cache<T: Encodable>(_ data: T, for endpoint: APIEndpoint) {
+        let url = cacheURL(for: endpoint)
+        if let encoded = try? JSONEncoder().encode(data) {
+            try? encoded.write(to: url)
+        }
+    }
+
+    private func loadCache<T: Decodable>(for endpoint: APIEndpoint, as type: T.Type) -> T? {
+        let url = cacheURL(for: endpoint)
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(T.self, from: data)
+    }
+
+    private func cacheURL(for endpoint: APIEndpoint) -> URL {
+        let fileName = "cache_\(endpoint.path.replacingOccurrences(of: "/", with: "_"))"
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName)
     }
 }

@@ -14,10 +14,10 @@ struct CardView: View {
     var body: some View {
         ZStack {
             ZStack {
-                AsyncImageView(imageUrl: item.image)
+                AsyncImageView(imageUrl: item.image ?? "")
 
                 Color.white
-                    .opacity(0.4)
+                    .opacity(0.6)
             }
             .frame(maxWidth: UIScreen.main.bounds.width * 0.9, maxHeight: .infinity)
             .clipped()
@@ -26,10 +26,10 @@ struct CardView: View {
 
             VStack (alignment: .leading) {
                 Spacer()
-                Text(item.title)
+                Text(item.title ?? "")
                     .font(.title2)
                     .bold()
-                Text(item.summary)
+                Text(item.summary ?? "")
                     .font(.caption)
                     .bold()
                 Text("By \(username)")
@@ -37,7 +37,7 @@ struct CardView: View {
                     .bold()
                     .padding(.top, 2)
             }
-            .padding(.bottom)
+            .padding(.bottom, 30)
             .frame(maxWidth: UIScreen.main.bounds.width * 0.9)
 
         }

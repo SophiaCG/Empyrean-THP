@@ -21,7 +21,19 @@ struct AsyncImageView: View {
                     .resizable()
                     .scaledToFill()
             case .failure:
-                Color.gray
+                VStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .font(.largeTitle)
+                        .padding(.top, 30)
+                    Text("Failed to load image")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(10)
             @unknown default:
                 EmptyView()
             }

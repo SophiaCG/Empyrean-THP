@@ -5,32 +5,45 @@
 //  Created by Sophia Gorgonio on 6/3/25.
 //
 
-import SwiftUI
 import Foundation
+import SwiftUI
+import CoreData
 
 struct DetailView: View {
-    
-    @StateObject private var usersVM = UsersViewModel()
-    @StateObject private var itemsVM = ItemsViewModel()
-    @EnvironmentObject var loginVM: LoginViewModel
 
     @State var item: Item
+    @State var user: User
+    @State var comments: [Comment]
+
+    @State private var isLiked = false
+    var onUnlike: (() -> Void)? = nil
 
     var body: some View {
         ScrollView {
-                AsyncImageView(imageUrl: item.image)
-                    .frame(maxWidth: UIScreen.main.bounds.width * 0.9, maxHeight: 250)
+            HStack {
+                Spacer()
+                HeartButton(isLiked: $isLiked, item: $item, user: $user, comments: $comments, onUnlike: onUnlike)
+            }
+            .padding([.horizontal, .top], 25)
+            .padding(.bottom, 10)
+
+            AsyncImageView(imageUrl: item.image ?? "")
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.9, maxHeight: 250)
+
             VStack (alignment: .leading, spacing: 10) {
 
-                Text(item.title)
+                Text(item.title ?? "")
                     .font(.title)
                     .bold()
                 
-                Text(item.summary)
+                Text(item.summary ?? "")
                     .font(.caption)
                     .bold()
-                
-                Spacer(minLength: 50)
+                                
+                Divider()
+                    .frame(height: 1)
+                    .overlay(.gray)
+                    .padding(.vertical)
                 
                 ZStack {
                     Color.brown
@@ -39,14 +52,14 @@ struct DetailView: View {
                         .shadow(radius: 5)
                     
                     HStack {
-                        AsyncImageView(imageUrl: usersVM.user.avatar)
+                        AsyncImageView(imageUrl: user.avatar)
                             .frame(width: 50, height: 50)
                             .clipShape(Circle())
                         
                         VStack (alignment: .leading) {
-                            Text("Author: \(usersVM.user.name)")
+                            Text("Author: \(user.name)")
                                 .fontWeight(.heavy)
-                            Text("Contact: \(usersVM.user.email)")
+                            Text("Contact: \(user.email)")
                                 .bold()
                         }.padding(.leading, 10)
                         
@@ -64,18 +77,19 @@ struct DetailView: View {
                             .fill(Color.blue)
                             .frame(width: 25, height: 25)
                         
-                        Text("\(itemsVM.comments.count)")
+                        Text("\(comments.count)")
                             .foregroundColor(.white)
                             .font(.caption)
                             .fontWeight(.heavy)
                     }
                 }
 
-                ForEach(itemsVM.comments) { comment in
+                ForEach(comments) { comment in
                     HStack {
                         ZStack {
                             Circle()
-                                .fill(Color.random)
+                                .fill(Color.blue)
+                                .opacity(0.5)
                                 .frame(width: 35, height: 35)
                             
                             Text(String(comment.author.first ?? " "))
@@ -101,21 +115,13 @@ struct DetailView: View {
                 Spacer()
                 
             }.padding(.horizontal)
-
         }
-        .onAppear {
-            if let token = loginVM.token {
-                usersVM.fetchUserDetails(token: token, id: item.userId)
-                itemsVM.fetchItemComments(token: token, id: item.id)
-            }
-        }
-
     }
     
     func formatTimestamp(_ isoString: String) -> String {
         let inputFormatter = DateFormatter()
         inputFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        inputFormatter.timeZone = TimeZone(secondsFromGMT: 0) // Adjust as needed
+        inputFormatter.timeZone = TimeZone(secondsFromGMT: 0)
 
         let outputFormatter = DateFormatter()
         outputFormatter.dateStyle = .short
@@ -126,15 +132,5 @@ struct DetailView: View {
         } else {
             return "Invalid date"
         }
-    }
-}
-
-extension Color {
-    static var random: Color {
-        return Color(
-            red: .random(in: 0...1),
-            green: .random(in: 0...1),
-            blue: .random(in: 0...1)
-        )
-    }
+    }    
 }

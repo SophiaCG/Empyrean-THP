@@ -14,10 +14,10 @@ struct RowView: View {
     var body: some View {
         HStack {
             VStack (alignment: .leading) {
-                Text(item.title)
+                Text(item.title ?? "")
                     .font(.system(size: 15, weight: .bold, design: .default))
                     .bold()
-                Text(item.summary)
+                Text(item.summary ?? "")
                     .font(.caption)
                 Text("By \(username)")
                     .font(.caption)
@@ -28,7 +28,7 @@ struct RowView: View {
             
             Spacer()
 
-            AsyncImageView(imageUrl: item.image)
+            AsyncImageView(imageUrl: item.image ?? "")
                 .frame(width: 125, height: 75)
 
         }
