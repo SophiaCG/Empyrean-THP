@@ -9,6 +9,10 @@ import SwiftUI
 
 // Displays all posts in a scrollable list with a featured carousel, includes navigation to favorites and detailed post view.
 struct PostsView: View {
+    
+    // Controls the view’s presentation state
+    @Environment(\.presentationMode) var presentationMode
+
     // View models to fetch and manage data
     @EnvironmentObject var loginVM: LoginViewModel
     @StateObject private var itemsVM = ItemsViewModel()
@@ -75,9 +79,17 @@ struct PostsView: View {
                 }
             }
         }
-
         // MARK: - Toolbar with Navigation to Favorites
         .toolbar {
+            // Logout button
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("Logout") {
+                    loginVM.logout()
+                    presentationMode.wrappedValue.dismiss()
+                }
+            }
+
+            // Favorites List button
             ToolbarItem(placement: .navigationBarTrailing) {
                 NavigationLink {
                     FavoritesListView()
@@ -93,6 +105,9 @@ struct PostsView: View {
                 }.buttonStyle(.plain)
             }
         }
+
+        // Hide back button
+        .navigationBarBackButtonHidden(true)
 
         // MARK: - Data Fetching on View Appear
         .onAppear {
