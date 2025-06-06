@@ -102,7 +102,9 @@ struct PostsView: View {
                             .foregroundColor(.red)
                             .font(.system(size: 20))
                     }
-                }.buttonStyle(.plain)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("favoritesButton")
             }
         }
 

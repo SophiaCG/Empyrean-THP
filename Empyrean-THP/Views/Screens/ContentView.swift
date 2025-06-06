@@ -34,6 +34,7 @@ struct ContentView: View {
                 VStack {
                     // App title
                     Text("Empyrean News")
+                        .accessibilityIdentifier("appTitle")
                         .font(.largeTitle)
                         .bold()
 
@@ -50,6 +51,7 @@ struct ContentView: View {
                             .frame(height: 50)
 
                         TextField("Username", text: $loginVM.username)
+                            .accessibilityIdentifier("usernameField")
                             .padding(.horizontal)
                             .autocapitalization(.none)
                     }
@@ -67,6 +69,7 @@ struct ContentView: View {
                             .frame(height: 50)
 
                         SecureField("Password", text: $loginVM.password)
+                            .accessibilityIdentifier("passwordField")
                             .padding(.horizontal)
                             .autocapitalization(.none)
                     }
@@ -83,6 +86,7 @@ struct ContentView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
+                    .accessibilityIdentifier("loginButton")
                     .frame(width: 300, height: 50)
                     .background(Color.blue)
                     .cornerRadius(10)
@@ -93,6 +97,7 @@ struct ContentView: View {
                             .foregroundColor(.red)
                             .font(.largeTitle)
                         Text("Error: \(loginVM.errorMessage)").foregroundColor(.red)
+                            .accessibilityIdentifier("errorMessage")
                     }
                 }
 

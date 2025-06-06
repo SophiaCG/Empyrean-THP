@@ -24,6 +24,12 @@ class LoginViewModel: ObservableObject {
     private let tokenKey = "authToken"
 
     init() {
+        // Starts at login page for testing purposes
+        let isUITesting = CommandLine.arguments.contains("--uitesting")
+        if isUITesting {
+            UserDefaults.standard.removeObject(forKey: tokenKey)
+        }
+
         // Loads the saved token from UserDefaults
         self.token = UserDefaults.standard.string(forKey: tokenKey)
         // Sets isAuthenticated based on whether a token exists or not

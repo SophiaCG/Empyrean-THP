@@ -7,35 +7,69 @@
 
 import XCTest
 
-final class Empyrean_THPUITests: XCTestCase {
+final class Empyrean_THP_UITests: XCTestCase {
+
+    let app = XCUIApplication()
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+        app.launchArguments.append("--uitesting")
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
-        }
+    func testLoginUIElementsExist() throws {
+        let appTitle = app.staticTexts["appTitle"]
+        XCTAssertTrue(appTitle.waitForExistence(timeout: 5), "App title not found")
+
+        let usernameField = app.textFields["usernameField"]
+        XCTAssertTrue(usernameField.waitForExistence(timeout: 5), "Username field not found")
+
+        let passwordField = app.secureTextFields["passwordField"]
+        XCTAssertTrue(passwordField.waitForExistence(timeout: 5), "Password field not found")
+
+        let loginButton = app.buttons["loginButton"]
+        XCTAssertTrue(loginButton.waitForExistence(timeout: 5), "Login button not found")
+    }
+
+    func testLoginWithCorrectCredentials() throws {
+        let usernameField = app.textFields["usernameField"]
+        let passwordField = app.secureTextFields["passwordField"]
+        let loginButton = app.buttons["loginButton"]
+
+        XCTAssertTrue(usernameField.waitForExistence(timeout: 5))
+        XCTAssertTrue(passwordField.waitForExistence(timeout: 5))
+        XCTAssertTrue(loginButton.waitForExistence(timeout: 5))
+
+        usernameField.tap()
+        usernameField.typeText("test")
+
+        passwordField.tap()
+        passwordField.typeText("password123")
+
+        loginButton.tap()
+
+        let favoritesButton = app.buttons["favoritesButton"]
+        XCTAssertTrue(favoritesButton.waitForExistence(timeout: 5), "Posts screen not shown after login")
+    }
+
+    func testLoginWithInvalidCredentialsShowsError() throws {
+        let usernameField = app.textFields["usernameField"]
+        let passwordField = app.secureTextFields["passwordField"]
+        let loginButton = app.buttons["loginButton"]
+
+        XCTAssertTrue(usernameField.waitForExistence(timeout: 5))
+        XCTAssertTrue(passwordField.waitForExistence(timeout: 5))
+        XCTAssertTrue(loginButton.waitForExistence(timeout: 5))
+
+        usernameField.tap()
+        usernameField.typeText("wrongUser")
+
+        passwordField.tap()
+        passwordField.typeText("wrongPass")
+
+        loginButton.tap()
+
+        let errorMessage = app.staticTexts["errorMessage"]
+        XCTAssertTrue(errorMessage.waitForExistence(timeout: 5), "Expected error message not shown")
     }
 }
