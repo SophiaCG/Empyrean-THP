@@ -51,7 +51,7 @@ This project uses a mock API server to simulate backend functionality including 
 
 ### Installation
 
- Navigate to the project folder in your terminal, then run:
+ Navigate to the folder called MockServer within the project folder in your terminal, then run:
 
  ```bash
  npm install
