@@ -8,29 +8,50 @@
 import XCTest
 @testable import Empyrean_THP
 
-final class Empyrean_THPTests: XCTestCase {
+final class LoginViewModelTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    var viewModel: LoginViewModel!
+
+    override func setUp() {
+        super.setUp()
+        viewModel = LoginViewModel()
+        UserDefaults.standard.removeObject(forKey: "authToken")
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func testLogin_withInvalidUsername_setsError() {
+        viewModel.username = "wrong"
+        viewModel.password = "password123"
+        viewModel.login()
+
+        XCTAssertTrue(viewModel.wrongUsername)
+        XCTAssertFalse(viewModel.isAuthenticated)
+        XCTAssertEqual(viewModel.errorMessage, "Invalid credentials")
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testLogin_withInvalidPassword_setsError() {
+        viewModel.username = "test"
+        viewModel.password = "wrong"
+        viewModel.login()
+
+        XCTAssertTrue(viewModel.wrongPassword)
+        XCTAssertFalse(viewModel.isAuthenticated)
+        XCTAssertEqual(viewModel.errorMessage, "Invalid credentials")
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    func testLogin_withValidCredentials_successfulLogin() {
+        let expectation = self.expectation(description: "LoginSuccess")
+        viewModel.username = "test"
+        viewModel.password = "password123"
+
+        viewModel.login()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            XCTAssertEqual(self.viewModel.token, "fake-jwt-token")
+            XCTAssertTrue(self.viewModel.isAuthenticated)
+            XCTAssertEqual(UserDefaults.standard.string(forKey: "authToken"), "fake-jwt-token")
+            expectation.fulfill()
         }
-    }
 
+        waitForExpectations(timeout: 1)
+    }
 }
